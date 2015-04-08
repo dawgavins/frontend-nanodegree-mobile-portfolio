@@ -2,9 +2,11 @@
 Running the website
 ===================
 
-To view/test the website, please either open your web browser to the hosted site at ???? TODO ????, or load dist/index.html in your browser.
+To view/test the website, please either open your web browser to the hosted site at:
+  http://dawgavins.github.io/frontend-nanodegree-mobile-portfolio/dist/index.html
+or grab the repository and load dist/index.html in your browser.
 
-The source for the website is all in the root directory of the project, and the optimized version of all files is all mirrored in "minified"/"production" form under the dist/ directory.
+The source for the website is all in the root directory of the project, and the optimized/production version of all files is under the dist/ directory
 
 I set up Grunt and installed minify tasks for CSS (grunt-contrib-cssmin), Javascript (grunt-contrib-uglify), HTML (grunt-minify-html), and the image files (grunt-contrib-imagemin).  These tasks take all the files, reduce their size, and copy them to the same relative location under the dist directory.
 

@@ -398,9 +398,14 @@ var pizzaElementGenerator = function(i) {
   return pizzaContainer;
 };
 
+// this is an array where we will keep track of a list of randomly generated 
+// pizza items, again to save time on DOM queries.
+var g_randomPizzaItems = [];
+
 // resizePizzas(size) is called when the slider in the "Our Pizzas" section of the website moves.
 var resizePizzas = function(size) { 
   window.performance.mark("mark_start_resize");   // User Timing API function
+
 
   // Changes the value for the size of the pizza above the slider
   function changeSliderLabel(size) {
@@ -450,10 +455,17 @@ var resizePizzas = function(size) {
 
   // Iterates through pizza elements on the page and changes their widths
   function changePizzaSizes(size) {
-    for (var i = 0; i < document.querySelectorAll(".randomPizzaContainer").length; i++) {
-      var dx = determineDx(document.querySelectorAll(".randomPizzaContainer")[i], size);
-      var newwidth = (document.querySelectorAll(".randomPizzaContainer")[i].offsetWidth + dx) + 'px';
-      document.querySelectorAll(".randomPizzaContainer")[i].style.width = newwidth;
+    // All these randomPizzas are the same size...so just calculate the size change
+    // on the first one, and apply it to all the others
+
+    // calculate the size difference for one pizza (the first one)
+    var dx = determineDx(g_randomPizzaItems[0],size);
+    // create the size string that we can assign to each item
+    var newWidth = (g_randomPizzaItems[0].offsetWidth + dx) + 'px';
+
+    // apply the newly calculated width to all the items in our array
+    for (var i = 0; i < g_randomPizzaItems.length; i++) {
+      g_randomPizzaItems[i].style.width = newWidth;
     }
   }
 
@@ -472,7 +484,12 @@ window.performance.mark("mark_start_generating"); // collect timing data
 for (var i = 2; i < 100; i++) {
   var pizzasDiv = document.getElementById("randomPizzas");
   pizzasDiv.appendChild(pizzaElementGenerator(i));
+
 }
+
+// Run the query for the random pizza elements once, and store the list in a global array 
+// so that we don't need to continuously query the DOM
+g_randomPizzaItems = document.getElementsByClassName('randomPizzaContainer');
 
 // User Timing API again. These measurements tell you how long it took to generate the initial pizzas
 window.performance.mark("mark_end_generating");
@@ -494,27 +511,30 @@ function logAverageFrame(times) {   // times is the array of User Timing measure
   console.log("Average time to generate last 10 frames: " + sum / 10 + "ms");
 }
 
-// precalculate some values to be used
-var g_items = [];
-var j;
-var sinArray = [];
-for (j = 0; j < 5; j++) {
-  sinArray[j] = Math.sin((document.body.scrollTop / 1250) + (j % 5));
-}
 
 // The following code for sliding background pizzas was pulled from Ilya's demo found at:
 // https://www.igvita.com/slides/2012/devtools-tips-and-tricks/jank-demo.html
+
+// this is a global array where we will keep track of a list of moving pizzas, to
+// save time on DOM queries to retrieve them 
+var g_moverItems = [];
 
 // Moves the sliding background pizzas based on scroll position
 function updatePositions() {
   frame++;
   window.performance.mark("mark_start_frame");
 
-  var phase;
+  var i; // used for loop iteration
+  var phaseArray = []; // used to store calculated position for each phase
 
-  for (var i = 0; i < g_items.length; i++) {
-    phase = sinArray[i%5];
-    g_items[i].style.left = g_items[i].basicLeft + 100 * phase + 'px';
+  // calculate the x position for each of the 5 phases we're using and store in an
+  // array - we don't need to calculate this more than once per phase
+  for (i = 0; i < 5; i++) {
+    phaseArray[i] = Math.sin((document.body.scrollTop / 1250) + (i % 5));
+  }
+  // for each moving pizza, apply the newly calculated x value to move it horizontally
+  for ( i = 0; i < g_moverItems.length; i++) {
+    g_moverItems[i].style.left = g_moverItems[i].basicLeft + 100 * phaseArray[i%5] + 'px';
   }
 
   // User Timing API to the rescue again. Seriously, it's worth learning.
@@ -532,9 +552,22 @@ window.addEventListener('scroll', updatePositions);
 
 // Generates the sliding pizzas when the page loads.
 document.addEventListener('DOMContentLoaded', function() {
-  var cols = 8;
+  // the code in updatePositions only calculates 5 coloumns, so we will only create 5
+  var cols = 5;
+  // each item is spaced 256 apart, vertically an horizontally
   var s = 256;
-  for (var i = 0; i < 200; i++) {
+  // find max height we need to account for.  found this technique on StackOverflow:
+  // http://stackoverflow.com/questions/6850164/get-the-device-width-in-javascript
+  var height = (window.innerHeight > 0) ? window.innerHeight : screen.height;
+  // calculate the maximum number of rows we could need to show for this device
+  var rows = Math.ceil(height / s); 
+  // total number of .mover items is rows * columns - almost certainly much less than 200. 
+  // rows is 4 on my MacBook Pro, so numPizzas works out to 20
+  var numPizzas = cols * rows; 
+
+  // Here we loop through the total number of pizzas, creating an image element, initializing it
+  // to our mover pizza class, and setting the initial position
+  for (var i = 0; i < numPizzas; i++) {
     var elem = document.createElement('img');
     elem.className = 'mover';
     elem.src = "images/pizza.png";
@@ -544,7 +577,7 @@ document.addEventListener('DOMContentLoaded', function() {
     elem.style.top = (Math.floor(i / cols) * s) + 'px';
     document.querySelector("#movingPizzas1").appendChild(elem);
   }
-  g_items = document.querySelectorAll('.mover');
+  g_moverItems = document.getElementsByClassName('mover');
 
   updatePositions();
 });

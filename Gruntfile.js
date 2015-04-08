@@ -10,7 +10,6 @@ module.exports = function(grunt) {
   // Load grunt tasks
   require('load-grunt-tasks')(grunt);
 
-
   // Load the uglify plug-in - we will use this to minify js files.
   grunt.loadNpmTasks('grunt-contrib-uglify');
 

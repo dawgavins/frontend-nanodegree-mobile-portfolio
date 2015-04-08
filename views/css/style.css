@@ -33,6 +33,10 @@ form {
   position: fixed;
   width: 256px;
   z-index: -1;
+  /* These lines force these items onto their own layer, reducing paint volume
+     I checked and performance is still ok on my Samsung Galaxy S3 */
+  backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
 }
 
 .randomPizzaContainer {

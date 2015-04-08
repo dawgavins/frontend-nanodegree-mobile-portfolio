@@ -1,0 +1,17 @@
+==========
+References
+==========
+
+I used the following sites for reference during the course of this project.
+
+http://gruntjs.com/
+https://ngrok.com/
+http://www.jamescryer.com/2014/06/12/grunt-pagespeed-and-ngrok-locally-testing/
+https://developers.google.com/speed/pagespeed/insights/
+http://www.maclife.com/article/columns/terminal_101_using_ps_manage_processes
+http://blog.teamtreehouse.com/install-node-js-npm-mac
+https://github.com/gruntjs/grunt-contrib-uglify
+https://github.com/gruntjs/grunt-contrib-imagemin
+https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/webfont-optimization?hl=en
+http://aerotwist.com/blog/on-translate3d-and-layer-creation-hacks/
+http://stackoverflow.com/questions/6850164/get-the-device-width-in-javascript

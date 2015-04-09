@@ -1,73 +1,36 @@
-## Website Performance Optimization portfolio project
+===================
+Running the website
+===================
 
-Your challenge, if you wish to accept it (and we sure hope you will), is to optimize this online portfolio for speed! In particular, optimize the critical rendering path and make this page render as quickly as possible by applying the techniques you've picked up in the [Critical Rendering Path course](https://www.udacity.com/course/ud884).
+To view/test the website, please either open your web browser to the hosted site at:
+  http://dawgavins.github.io/frontend-nanodegree-mobile-portfolio/dist/index.html
+or grab the repository and load dist/index.html in your browser.
 
-To get started, check out the repository, inspect the code,
+The source for the website is all in the root directory of the project, and the optimized/production version of all files is under the dist/ directory
 
-### Getting started
+I set up Grunt and installed minify tasks for CSS (grunt-contrib-cssmin), Javascript (grunt-contrib-uglify), HTML (grunt-minify-html), and the image files (grunt-contrib-imagemin).  These tasks take all the files, reduce their size, and copy them to the same relative location under the dist directory.
 
-####Part 1: Optimize PageSpeed Insights score for index.html
+I also installed the pagespeed plugin for Grunt, to help automate testing.
 
-Some useful tips to help you get started:
+All references used during the course of this project are listed in references.txt.
 
-1. Check out the repository
-1. To inspect the site on your phone, you can run a local server
+=====================================================
+Optimizations made in views/js/main.js for pizza.html
+=====================================================
 
-  ```bash
-  $> cd /path/to/your-project-folder
-  $> python -m SimpleHTTPServer 8080
-  ```
+Moving pizza optimization
+-------------------------
+1)  I started by reducing the number of animating pizzas being created.  I noticed that only 5 columns of pizzas were being updated in updatePositions(), so I assumed it was safe to reduce the number of coloumns originally created from 8 to 5.  I also calculated the number of rows of pizzas required by dividing the window height by the height (256) allocated to each row of pizzas.  The total number of pizzas created is now the number of rows * the number of columns.  On my macbook Pro laptop this results in 5 * 4 == 20 pizzas, and on my Samsung Galaxy S3 it adds up to 5 * 6 = 30 pizzas, both well down from 200.
 
-1. Open a browser and visit localhost:8080
-1. Download and install [ngrok](https://ngrok.com/) to make your local server accessible remotely.
+2)  I also optimized the loop inside the updatePositions() function.  The new positions are now only calculated once for each of the 5 phases, and applied to each row of pizzas without repeating the calculation.
 
-  ``` bash
-  $> cd /path/to/your-project-folder
-  $> ngrok 8080
-  ```
+3)  I stored a global array (g_moverItems) of all moving pizzas after they are created.  This was done so that when updatePositions() is called, there is no longer a need to query the document for a list of moving pizzas.
 
-1. Copy the public URL ngrok gives you and try running it through PageSpeed Insights! Optional: [More on integrating ngrok, Grunt and PageSpeed.](http://www.jamescryer.com/2014/06/12/grunt-pagespeed-and-ngrok-locally-testing/)
+4)  I added the "backface-visibility: hidden;", and "transform: translate3d(0, 0, 0);" properties to the .mover class in views/css/style.css.  This cuts down on painting time by giving each moving pizza its own layer, allowing the browser to repaint only the areas where the pizzas have moved.  This takes more memory but runs faster, so may impact slower mobile devices, but I tested it on my Samsung Galaxy S3, and it was fine, so I consider it ok to do.
 
-Profile, optimize, measure... and then lather, rinse, and repeat. Good luck!
+Resizing pizza optimization
+---------------------------
 
-####Part 2: Optimize Frames per Second in pizza.html
+1)  I stored a global array (g_randomPizzaItems) of all resizeable pizzas after they are created.  This was done so that when resizePizzas is called, there is no longer a need to query the document for a list of resizeable pizzas.
 
-To optimize views/pizza.html, you will need to modify views/js/main.js until your frames per second rate is 60 fps or higher. You will find instructive comments in main.js. 
-
-You might find the FPS Counter/HUD Display useful in Chrome developer tools described here: [Chrome Dev Tools tips-and-tricks](https://developer.chrome.com/devtools/docs/tips-and-tricks).
-
-### Optimization Tips and Tricks
-* [Optimizing Performance](https://developers.google.com/web/fundamentals/performance/ "web performance")
-* [Analyzing the Critical Rendering Path](https://developers.google.com/web/fundamentals/performance/critical-rendering-path/analyzing-crp.html "analyzing crp")
-* [Optimizing the Critical Rendering Path](https://developers.google.com/web/fundamentals/performance/critical-rendering-path/optimizing-critical-rendering-path.html "optimize the crp!")
-* [Avoiding Rendering Blocking CSS](https://developers.google.com/web/fundamentals/performance/critical-rendering-path/render-blocking-css.html "render blocking css")
-* [Optimizing JavaScript](https://developers.google.com/web/fundamentals/performance/critical-rendering-path/adding-interactivity-with-javascript.html "javascript")
-* [Measuring with Navigation Timing](https://developers.google.com/web/fundamentals/performance/critical-rendering-path/measure-crp.html "nav timing api"). We didn't cover the Navigation Timing API in the first two lessons but it's an incredibly useful tool for automated page profiling. I highly recommend reading.
-* <a href="https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/eliminate-downloads.html">The fewer the downloads, the better</a>
-* <a href="https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/optimize-encoding-and-transfer.html">Reduce the size of text</a>
-* <a href="https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/image-optimization.html">Optimize images</a>
-* <a href="https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching.html">HTTP caching</a>
-
-### Customization with Bootstrap
-The portfolio was built on Twitter's <a href="http://getbootstrap.com/">Bootstrap</a> framework. All custom styles are in `dist/css/portfolio.css` in the portfolio repo.
-
-* <a href="http://getbootstrap.com/css/">Bootstrap's CSS Classes</a>
-* <a href="http://getbootstrap.com/components/">Bootstrap's Components</a>
-
-### Sample Portfolios
-
-Feeling uninspired by the portfolio? Here's a list of cool portfolios I found after a few minutes of Googling.
-
-* <a href="http://www.reddit.com/r/webdev/comments/280qkr/would_anybody_like_to_post_their_portfolio_site/">A great discussion about portfolios on reddit</a>
-* <a href="http://ianlunn.co.uk/">http://ianlunn.co.uk/</a>
-* <a href="http://www.adhamdannaway.com/portfolio">http://www.adhamdannaway.com/portfolio</a>
-* <a href="http://www.timboelaars.nl/">http://www.timboelaars.nl/</a>
-* <a href="http://futoryan.prosite.com/">http://futoryan.prosite.com/</a>
-* <a href="http://playonpixels.prosite.com/21591/projects">http://playonpixels.prosite.com/21591/projects</a>
-* <a href="http://colintrenter.prosite.com/">http://colintrenter.prosite.com/</a>
-* <a href="http://calebmorris.prosite.com/">http://calebmorris.prosite.com/</a>
-* <a href="http://www.cullywright.com/">http://www.cullywright.com/</a>
-* <a href="http://yourjustlucky.com/">http://yourjustlucky.com/</a>
-* <a href="http://nicoledominguez.com/portfolio/">http://nicoledominguez.com/portfolio/</a>
-* <a href="http://www.roxannecook.com/">http://www.roxannecook.com/</a>
-* <a href="http://www.84colors.com/portfolio.html">http://www.84colors.com/portfolio.html</a>
+2)  I changed the loop inside changePizzaSizes.  Previously the new size was being calculated for every pizza, which was unnecessary since they are all being sized the same.  Instead, I calculated the size difference for the first pizza, and then apply that difference to the entire list of pizzas (cached in g_randomPizzaItems).

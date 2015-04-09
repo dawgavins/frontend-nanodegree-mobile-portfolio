@@ -12,6 +12,8 @@ I set up Grunt and installed minify tasks for CSS (grunt-contrib-cssmin), Javasc
 
 I also installed the pagespeed plugin for Grunt, to help automate testing.
 
+All references used during the course of this project are listed in references.txt.
+
 =====================================================
 Optimizations made in views/js/main.js for pizza.html
 =====================================================

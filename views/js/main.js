@@ -518,23 +518,31 @@ function logAverageFrame(times) {   // times is the array of User Timing measure
 // this is a global array where we will keep track of a list of moving pizzas, to
 // save time on DOM queries to retrieve them 
 var g_moverItems = [];
+// these variables hold the number of rows and columns of moving pizzas 
+// that we create once the DOM content is loaded - will be set during load callback
+var g_numMoverRows = 0;
+var g_numMoverColumns = 0;
 
 // Moves the sliding background pizzas based on scroll position
 function updatePositions() {
   frame++;
   window.performance.mark("mark_start_frame");
 
-  var i; // used for loop iteration
-  var phaseArray = []; // used to store calculated position for each phase
-
+  // used for loop iteration
+  var i; 
+  // used to store calculated position for each phase
+  var phaseArray = []; 
+  // number of distinct sin patterns to use.  Want to make this non-divisble with the number of 
+  // columns so that the patterns appear more random (not uniform row to row)
+  var numPhases = (g_numMoverCols % 2 === 0) ? 5 : 4;  
   // calculate the x position for each of the 5 phases we're using and store in an
   // array - we don't need to calculate this more than once per phase
-  for (i = 0; i < 5; i++) {
-    phaseArray[i] = Math.sin((document.body.scrollTop / 1250) + (i % 5));
+  for (i = 0; i < numPhases; i++) {
+    phaseArray[i] = Math.sin((document.body.scrollTop / 1250) + (i % numPhases));
   }
   // for each moving pizza, apply the newly calculated x value to move it horizontally
   for ( i = 0; i < g_moverItems.length; i++) {
-    g_moverItems[i].style.left = g_moverItems[i].basicLeft + 100 * phaseArray[i%5] + 'px';
+    g_moverItems[i].style.left = g_moverItems[i].basicLeft + 100 * phaseArray[i%numPhases] + 'px';
   }
 
   // User Timing API to the rescue again. Seriously, it's worth learning.
@@ -552,18 +560,24 @@ window.addEventListener('scroll', updatePositions);
 
 // Generates the sliding pizzas when the page loads.
 document.addEventListener('DOMContentLoaded', function() {
-  // the code in updatePositions only calculates 5 coloumns, so we will only create 5
-  var cols = 5;
   // each item is spaced 256 apart, vertically an horizontally
   var s = 256;
-  // find max height we need to account for.  found this technique on StackOverflow:
+  // find max width/height we need to account for.  found this technique on StackOverflow:
   // http://stackoverflow.com/questions/6850164/get-the-device-width-in-javascript
+  var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
   var height = (window.innerHeight > 0) ? window.innerHeight : screen.height;
-  // calculate the maximum number of rows we could need to show for this device
-  var rows = Math.ceil(height / s); 
+
+  console.log("width, height : " + width + ", " + height);
+
+  // calculate the maximum number of rows/columns we could need to show for this device
+  g_numMoverRows = Math.ceil(height / s); 
+  g_numMoverCols = 8; //leave this at 8.  I want to calculate it based off window width,
+                      // but that can be problematic if the window is resized larger
+                      // ...would be Math.ceil(width / s);
+
   // total number of .mover items is rows * columns - almost certainly much less than 200. 
   // rows is 4 on my MacBook Pro, so numPizzas works out to 20
-  var numPizzas = cols * rows; 
+  var numPizzas = g_numMoverCols * g_numMoverRows; 
 
   // Here we loop through the total number of pizzas, creating an image element, initializing it
   // to our mover pizza class, and setting the initial position
@@ -573,8 +587,8 @@ document.addEventListener('DOMContentLoaded', function() {
     elem.src = "images/pizza.png";
     elem.style.height = "100px";
     elem.style.width = "73.333px";
-    elem.basicLeft = (i % cols) * s;
-    elem.style.top = (Math.floor(i / cols) * s) + 'px';
+    elem.basicLeft = (i % g_numMoverCols) * s;
+    elem.style.top = (Math.floor(i / g_numMoverCols) * s) + 'px';
     document.querySelector("#movingPizzas1").appendChild(elem);
   }
   g_moverItems = document.getElementsByClassName('mover');
